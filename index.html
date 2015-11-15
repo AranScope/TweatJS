@@ -9,7 +9,7 @@
 
   </head>
   <body>
-    <canvas id="myCanvas" width="800" height="600" style="border:1blob.position.x solid #000000;">
+    <canvas id="myCanvas" width="800" height="600" style="border:1px solid #000000;">
     </canvas>
 
     <script>
@@ -18,9 +18,7 @@
 
       var blobs = [];
 
- 
-
-      for(var x = 0; x < 100; x++){
+      for(var i = 0; i < 100; i++){
         var newBlob = {name:"Aran", speed: 0.0, size: 0, position: new Vector(0, 0), velocity: new Vector(0, 0), radius: 1, followers: 1, likes: 10, following: 50, color: '#bada55'};
 
         newBlob.position = new Vector(Math.floor((Math.random() * width) + 1), Math.floor((Math.random() * height) + 1));
@@ -32,10 +30,10 @@
 
       var scale = 15.0 / blobs.length;
 
-      for(x in blobs){
-        blobs[x].size = getOriginalSize(blobs[x]);
-        blobs[x].speed = 1.25/blobs[x].size;
-        blobs[x].radius = getRadius(blobs[x]);
+      for(i in blobs){
+        blobs[i].size = getOriginalSize(blobs[i]);
+        blobs[i].speed = 1.25/blobs[i].size;
+        blobs[i].radius = getRadius(blobs[i]);
       }
 
       var c = document.getElementById("myCanvas");
@@ -45,34 +43,34 @@
       var context = c.getContext("2d");
 
       var pos = 0;
-      var x;
+
       function game(){
         context.clearRect(0, 0, c.width, c.height);
         blobs = intersects(blobs);
         context.fillStyle = '#4090ff';
         context.fillRect(0, 0, width, height);
 
-        for(x in blobs){
-          blobs[x].r = getRadius(blobs[x]);
+        for(i in blobs){
+          blobs[i].r = getRadius(blobs[i]);
 
-          blobs[x].speed = 1.25/blobs[x].size;
+          blobs[i].speed = 10/blobs[i].size;
 
-          blobs[x].velocity = multiply(normalise(blobs[x].velocity), blobs[x].speed);
+          blobs[i].velocity = multiply(normalise(blobs[i].velocity), blobs[i].speed);
 
-          blobs[x].position.x += blobs[x].velocity.x;
-          blobs[x].position.y += blobs[x].velocity.y;
+          blobs[i].position.x += blobs[i].velocity.x;
+          blobs[i].position.y += blobs[i].velocity.y;
 
 
-          if(blobs[x].position.x + blobs[x].r > width && blobs[x].velocity.x > 0) blobs[x].velocity.x = -blobs[x].velocity.x;
-          else if(blobs[x].position.x - blobs[x].r < 0 && blobs[x].velocity.x < 0) blobs[x].velocity.x = -blobs[x].velocity.x;
-          if(blobs[x].position.y + blobs[x].r > height && blobs[x].velocity.y > 0) blobs[x].velocity.y = -blobs[x].velocity.y;
-          else if(blobs[x].position.y - blobs[x].r < 0 && blobs[x].velocity.y < 0) blobs[x].velocity.y = -blobs[x].velocity.y;
+          if(blobs[i].position.x + blobs[i].r > width && blobs[i].velocity.x > 0) blobs[i].velocity.x = -blobs[i].velocity.x;
+          else if(blobs[i].position.x - blobs[i].r < 0 && blobs[i].velocity.x < 0) blobs[i].velocity.x = -blobs[i].velocity.x;
+          if(blobs[i].position.y + blobs[i].r > height && blobs[i].velocity.y > 0) blobs[i].velocity.y = -blobs[i].velocity.y;
+          else if(blobs[i].position.y - blobs[i].r < 0 && blobs[i].velocity.y < 0) blobs[i].velocity.y = -blobs[i].velocity.y;
 
           context.beginPath();
-          context.arc(blobs[x].position.x, blobs[x].position.y, blobs[x].r, 0, 2 * Math.PI, false);
+          context.arc(blobs[i].position.x, blobs[i].position.y, blobs[i].r, 0, 2 * Math.PI, false);
           context.closePath();
 
-          context.fillStyle = blobs[x].color;
+          context.fillStyle = blobs[i].color;
           context.fill();
           context.lineWidth = 3;
           context.strokeStyle = '#ffffff';
@@ -80,30 +78,30 @@
 
           context.font="30px Arial";
           context.fillStyle = '#ffffff';
-          var txtWidth = context.measureText(blobs[x].name).width;
-          var txtHeight = context.measureText(blobs[x].name).height;
+          var txtWidth = context.measureText(blobs[i].name).width;
+          var txtHeight = context.measureText(blobs[i].name).height;
           //context.fillText(blobs[x].size,blobs[x].position.x - txtWidth/2,blobs[x].position.y - blobs[x].r - 10);
         }
 
-        for(x in blobs){
-          blobs[x].size = getDecaySize(blobs[x]);
+        for(i in blobs){
+          blobs[i].size = getDecaySize(blobs[i]);
         }
       }
 
         function intersects(blobs){
           var blobsSize = blobs.length;
-          for(var x = 0; x < blobsSize; x++){
-            for(var y = 0; y < blobsSize; y++){
-              if(blobs[x] != blobs[y]){
-                if(blobs[x].size > blobs[y].size){
-                  var distance = Math.sqrt(Math.pow(blobs[y].position.x - blobs[x].position.x, 2) + Math.pow(blobs[y].position.y - blobs[x].position.y, 2));
-                  if(distance < blobs[x].r){
-                    blobs[x].size = (blobs[x].size + 4 * Math.log(blobs[y].size + 1) / (blobs[x].size));
-                    blobs[y].size = getOriginalSize(blobs[y]);
+          for(var i = 0; i < blobsSize; i++){
+            for(var j = 0; j < blobsSize; j++){
+              if(blobs[i] != blobs[j]){
+                if(blobs[i].size > blobs[j].size){
+                  var distance = Math.sqrt(Math.pow(blobs[j].position.x - blobs[i].position.x, 2) + Math.pow(blobs[j].position.y - blobs[i].position.y, 2));
+                  if(distance < blobs[i].r){
+                    blobs[i].size = (blobs[i].size + 4 * Math.log(blobs[j].size + 1) / (blobs[i].size));
+                    blobs[j].size = getOriginalSize(blobs[j]);
 
-                    console.log(blobs[x].size);
-                    blobs[y].position.x = Math.floor((Math.random() * width) + 1);
-                    blobs[y].position.y = Math.floor((Math.random() * height) + 1);
+                    console.log(blobs[i].size);
+                    blobs[j].position.x = Math.floor((Math.random() * width) + 1);
+                    blobs[j].position.y = Math.floor((Math.random() * height) + 1);
                   }
                 }
               }
@@ -125,7 +123,7 @@
         }
 
         function getDecaySize(blob) {
-          var tempSize = blob.size - Math.log(blobs[x].size)/3000;
+          var tempSize = blob.size - Math.log(blob.size)/3000;
     			return tempSize;
 		    }
 
@@ -146,6 +144,21 @@
         function multiply(vect, val){
           return new Vector(vect.x*val, vect.y*val);
         }
+
+        // function getBlob(){
+        //   var function getOutput() {
+        //      $.ajax({
+        //         url:'twitter.php',
+        //         complete: function (response) {
+        //             $('#output').html(response.responseText);
+        //         },
+        //         error: function () {
+        //             $('#output').html('Bummer: there was an error!');
+        //         }
+        //     });
+        //     return false;
+        //   }
+        // }
 
 
       myVar = setInterval(game, 20);
