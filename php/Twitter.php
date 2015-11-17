@@ -19,7 +19,8 @@ class Twitter {
 	}
 	
 	public function streamUser($user) {
-		$usersToFollow += "," + $user;
+		if($usersToFollow != "") $usersToFollow += ",";
+		$usersToFollow += $user;
 	}
 	
 	public function startStream() {
