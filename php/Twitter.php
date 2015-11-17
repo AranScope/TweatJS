@@ -23,7 +23,7 @@ class Twitter {
 	}
 	
 	public function startStream() {
-		if($usersToFollow !== "") {
+		if($usersToFollow == "") {
 			throw new Exception("At least one user must be followed before staring the stream")
 		}
 		sendPostRequest("https://stream.twitter.com/1.1/statuses/filter.json", "follow", $usersToFollow);
