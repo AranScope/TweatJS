@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>title</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+
+
+  </head>
+  <body>
+    <canvas id="myCanvas" width="800" height="600" style="border:1blob.position.x solid #000000;">
+    </canvas>
+
+    <script>
+
+    //-----------------
+    //Browser Detection
+    //-----------------
+    navigator.sayswho= (function(){
+        var N= navigator.appName, ua= navigator.userAgent, tem;
+        var M= ua.match(/(opera|chrome|safari|firefox|msie)\/?\s*(\.?\d+(\.\d+)*)/i);
+        if(M && (tem= ua.match(/version\/([\.\d]+)/i))!= null) M[2]= tem[1];
+        M= M? [M[1], M[2]]: [N, navigator.appVersion, '-?'];
+     
+        return M;
+    })();
+     
+    var browser;
+    if (navigator.sayswho[0] == "Firefox")
+    	browser="f";
+    else if (navigator.sayswho[0] == "Chrome")
+    	browser="c";
+    else if (navigator.sayswho[0] == "Safari")
+    	browser="s";
+    else  if (navigator.sayswho[0] == "Microsoft")
+    	browser="m";
+    else
+    	browser="f";
+
+    var mouseX = 300; //default values
+    var mouseY = 300; //default values
+
+
+
+    var width = $(window).width();
+    var height = $(window).height();
+
+    var blobs = [];
+
+ 
+
+      for(var x = 0; x < 1; x++){
+        var newBlob = {name:"Aran", speed: 0.0, size: 0, position: new Vector(0, 0), velocity: new Vector(0, 0), radius: 1, followers: 1, likes: 10, following: 50, color: '#bada55'};
+
+        newBlob.position = new Vector(Math.floor((Math.random() * width) + 1), Math.floor((Math.random() * height) + 1));
+        newBlob.velocity = new Vector(Math.random(), Math.random());
+        newBlob.followers = Math.random() * 500
+
+        blobs.push(newBlob);
+      }
+
+	var playerBlob = {name: "Player", speed: 1.1, size: 0, position: new Vector(2,2), velocity: new Vector(2,2), radius: 1, followers: 1, likes: 10, following: 50, color: '#000000'};
+	blobs.push(playerBlob);
+
+      var scale = 15.0 / blobs.length;
+
+      for(x in blobs){
+        blobs[x].size = getOriginalSize(blobs[x]);
+        blobs[x].speed = 1.25/blobs[x].size;
+        blobs[x].radius = getRadius(blobs[x]);
+      }
+
+      var c = document.getElementById("myCanvas");
+
+      c.addEventListener("click", canvasClick, false);
+
+      c.width = width;
+      c.height = height;
+      var context = c.getContext("2d");
+
+      var pos = 0;
+      var x;
+      function game(){
+        context.clearRect(0, 0, c.width, c.height);
+        blobs = intersects(blobs);
+        context.fillStyle = '#4090ff';
+        context.fillRect(0, 0, width, height);
+
+        for(x in blobs){
+          blobs[x].r = getRadius(blobs[x]);
+
+          blobs[x].speed = 1.25/blobs[x].size;
+
+          blobs[x].velocity = multiply(normalise(blobs[x].velocity), blobs[x].speed);
+
+          blobs[x].position.x += blobs[x].velocity.x;
+          blobs[x].position.y += blobs[x].velocity.y;
+
+
+          if(blobs[x].position.x + blobs[x].r > width && blobs[x].velocity.x > 0) blobs[x].velocity.x = -blobs[x].velocity.x;
+          else if(blobs[x].position.x - blobs[x].r < 0 && blobs[x].velocity.x < 0) blobs[x].velocity.x = -blobs[x].velocity.x;
+          if(blobs[x].position.y + blobs[x].r > height && blobs[x].velocity.y > 0) blobs[x].velocity.y = -blobs[x].velocity.y;
+          else if(blobs[x].position.y - blobs[x].r < 0 && blobs[x].velocity.y < 0) blobs[x].velocity.y = -blobs[x].velocity.y;
+
+          context.beginPath();
+          context.arc(blobs[x].position.x, blobs[x].position.y, blobs[x].r, 0, 2 * Math.PI, false);
+          context.closePath();
+
+          context.fillStyle = blobs[x].color;
+          context.fill();
+          context.lineWidth = 3;
+          context.strokeStyle = '#ffffff';
+          context.stroke();
+
+          context.font="30px Arial";
+          context.fillStyle = '#ffffff';
+          var txtWidth = context.measureText(blobs[x].name).width;
+          var txtHeight = context.measureText(blobs[x].name).height;
+          context.fillText(blobs[x].name,blobs[x].position.x - txtWidth/2,blobs[x].position.y - blobs[x].r - 10);
+        }
+
+        for(x in blobs){
+          blobs[x].size = getDecaySize(blobs[x]);
+        }
+      }
+
+        function intersects(blobs){
+          var blobsSize = blobs.length;
+          for(var x = 0; x < blobsSize; x++){
+            for(var y = 0; y < blobsSize; y++){
+              if(blobs[x] != blobs[y]){
+                if(blobs[x].size > blobs[y].size){
+                  var distance = Math.sqrt(Math.pow(blobs[y].position.x - blobs[x].position.x, 2) + Math.pow(blobs[y].position.y - blobs[x].position.y, 2));
+                  if(distance < blobs[x].r){
+                    blobs[x].size = (blobs[x].size + 4 * Math.log(blobs[y].size + 1) / (blobs[x].size));
+                    blobs[y].size = getOriginalSize(blobs[y]);
+
+                    console.log(blobs[x].size);
+                    blobs[y].position.x = Math.floor((Math.random() * width) + 1);
+                    blobs[y].position.y = Math.floor((Math.random() * height) + 1);
+                  }
+                }
+              }
+            }
+          }
+
+          return blobs;
+        }
+
+        function getOriginalSize(blob){
+          var size = Math.log(1 + blob.followers + (blob.likes/(blob.following+1)));
+          if(size < 1) size = 1;
+
+          return size;
+        }
+
+        function getRadius(blob){
+          return (scale * 40 * blob.size * Math.log(blob.size)/6.0 + 50)/2.0;
+        }
+
+        function getDecaySize(blob) {
+          var tempSize = blob.size - Math.log(blobs[x].size)/3000;
+    			return tempSize;
+		    }
+
+        function Vector(x, y) {
+          this.x = x;
+          this.y = y;
+        }
+
+        function normalise(vect){
+          var mag = Math.sqrt(vect.x*vect.x + vect.y*vect.y);
+          return new Vector(vect.x/mag, vect.y/mag);
+        }
+
+        function getVectorTo(target){
+          return new Vector(target.x - this.x, target.y - this.y);
+        }
+
+        function multiply(vect, val){
+          return new Vector(vect.x*val, vect.y*val);
+        }
+
+
+      myVar = setInterval(game, 20);
+
+    </script>
+  </body>
+</html>
