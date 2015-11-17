@@ -27,6 +27,7 @@ class Twitter {
 			throw new Exception("At least one user must be followed before staring the stream")
 		}
 		sendPostRequest("https://stream.twitter.com/1.1/statuses/filter.json", "follow", $usersToFollow);
+		// TODO: Specify a callback function that is run when the stream sends an event
 	}
 	
 	protected function sendGetRequest($url, $field_name, $field_val) {
