@@ -14,9 +14,9 @@
 
     <script>
 
- 	var c = document.getElementById("myCanvas");
+     	var c = document.getElementById("myCanvas");
 
-	 var context = c.getContext("2d");
+	    var context = c.getContext("2d");
       var width = $(window).width();
       var height = $(window).height();
 
@@ -38,15 +38,15 @@
      
       var browser;
       if (navigator.sayswho[0] == "Firefox")
-    	browser="f";
+    	 browser="f";
       else if (navigator.sayswho[0] == "Chrome")
-    	browser="c";
+    	 browser="c";
       else if (navigator.sayswho[0] == "Safari")
-    	browser="s";
+    	 browser="s";
       else  if (navigator.sayswho[0] == "Microsoft")
-    	browser="m";
+    	 browser="m";
       else
-    	browser="f";
+    	 browser="f";
 
       var blobs = [];
       var focusOffset = new Vector(0, 0);
@@ -56,36 +56,64 @@
       var mouseVec = new Vector(mouseX, mouseY);
  			
       c.addEventListener("click", canvasClick, false);
+      c.addEventListener("keydown", keyPressed, false);
 
+      //On click
       function canvasClick(event)
       {	
-    	if (browser == "f" || browser == "m")
-    	{
-    	  mouseX = event.clientX - c.offsetLeft + document.documentElement.scrollLeft;
+
+    	  if (browser == "f" || browser == "m")
+    	  {
+    	    mouseX = event.clientX - c.offsetLeft + document.documentElement.scrollLeft;
       	  mouseY = event.clientY - c.offsetTop + document.documentElement.scrollTop;
-    	}
-    	else //"s" or "c"
-    	{
-    	  mouseX = event.clientX - c.offsetLeft + document.body.scrollLeft;
-    	  mouseY = event.clientY - c.offsetTop + document.body.scrollTop;
-    	}
-	mouseVec = new Vector(mouseX,mouseY);
-	for (i in blobs) {
-		var distance = Math.sqrt(Math.pow(mouseX - (blobs[i].position.x+focusOffset.x), 2) + Math.pow(mouseY - (blobs[i].position.y+focusOffset.y), 2));
-		if (distance < getRadius(blobs[i])) {
-			for (j in blobs) {
-				blobs[j].inFocus = false;			
-			}
-			setFocus(blobs[i]);
-			blobs[i].inFocus = true;
-			console.log("ChangedFocus");
-			break;
-		}		
-	}
+    	  }
+    	  else //"s" or "c"
+    	  {
+    	    mouseX = event.clientX - c.offsetLeft + document.body.scrollLeft;
+    	    mouseY = event.clientY - c.offsetTop + document.body.scrollTop;
+    	  }
+
+	      mouseVec = new Vector(mouseX,mouseY);
+
+        if (inRectBounds(mouseVec, btn)) {
+          setFocusByVec(new Vector(width/2, height/2));
+          for (i in blobs) {
+            if (blobs[i].inFocus) {
+              blobs[i].inFocus = false;
+            }
+          }   
+        }
+        else {
+  	      for (i in blobs) {
+          	var distance = Math.sqrt(Math.pow(mouseX - (blobs[i].position.x+focusOffset.x), 2) + Math.pow(mouseY - (blobs[i].position.y+focusOffset.y), 2));
+          	if (distance < getRadius(blobs[i])) {
+          		for (j in blobs) {
+          			blobs[j].inFocus = false;			
+          		}
+          		setFocus(blobs[i]);
+          		blobs[i].inFocus = true;
+          		console.log("ChangedFocus");
+          		break;
+          	}		
+          }
+        }
       }	
 
+      //On key press
+      function keyPressed(event) {
+        var x = event.keyCode;
+        console.log("key pressed");
+        if (x == 27) {  // 27 is the ESC key
+          alert ("You pressed the Escape key!");
+        }
+      }
+
       for(var i = 0; i < 2; i++){
-        var newBlob = {name:"Aran", inFocus: false, speed: 0.0, size: 0, position: new Vector(0, 0), velocity: new Vector(0, 0), radius: 1, followers: 1, likes: 10, following: 50, color: '#bada55'};
+
+        var newBlob = {
+            name:"Aran", inFocus: false, speed: 0.0, size: 0, position: new Vector(0, 0), velocity: new Vector(0, 0), 
+            radius: 1, followers: 1, likes: 10, following: 50, color: '#bada55'
+        };
 
         newBlob.position = new Vector(Math.floor((Math.random() * width) + 1), Math.floor((Math.random() * height) + 1));
         newBlob.velocity = new Vector(Math.random(), Math.random());
@@ -94,13 +122,20 @@
         blobs.push(newBlob);
       }
 	
-	var playerBlob = {name:"Aran", inFocus: true, speed: 0.0, size: 1, position: new Vector(width/2, height/2), velocity: new Vector(2, 2), radius: 1, followers: 1, likes: 10, following: 50, color: '#000000'};
+	    var playerBlob = {
+        name:"Aran", inFocus: true, speed: 0.0, size: 1, position: new Vector(width/2, height/2), velocity: new Vector(2, 2), 
+        radius: 1, followers: 1, likes: 10, following: 50, color: '#000000'
+      };
 
-        blobs.push(playerBlob);
-	setFocus(playerBlob);
-	
+      blobs.push(playerBlob);
+	    setFocus(playerBlob);
 	
       var scale = 15.0 / blobs.length;
+      var btn = {
+        name: "Refocus", x: 0, y: 0, width: 60, height: 40
+      }
+
+      btn.x = width-btn.width;
 
       for(i in blobs){
         blobs[i].size = getOriginalSize(blobs[i]);
@@ -108,18 +143,18 @@
         blobs[i].radius = getRadius(blobs[i]);
       }
 
-     
-
       var pos = 0;
 
-      function game(){
+      function game() {
         context.clearRect(0, 0, c.width, c.height);
         blobs = intersects(blobs);
         context.fillStyle = '#4090ff';
         context.fillRect(0, 0, width, height);
+        context.fillStyle = "#bfcfff";
+        context.fillRect(btn.x, btn.y, btn.width, btn.height);
         var ctx=c.getContext("2d");
 
-        for (var i = 0; i < width; i += 40) {
+        for (var i = 0; i < width+40; i += 40) {
           ctx.beginPath();
           ctx.moveTo(i+focusOffset.x,focusOffset.y);
           ctx.lineTo(i+focusOffset.x,height+focusOffset.y);
@@ -186,11 +221,11 @@
                   if(distance < blobs[i].r){
                     //blobs[i].size = (blobs[i].size + 4 * Math.log(blobs[j].size + 1) / (blobs[i].size));
                     blobs[j].size = getOriginalSize(blobs[j]);
-		    if (blobs[j].inFocus) {
-			blobs[j].inFocus = false;
-			setFocusByVec(new Vector(width/2, height/2));
-		    }
-                    //console.log(blobs[i].size);
+
+              		  if (blobs[j].inFocus) {
+              			  blobs[j].inFocus = false;
+              		  }
+
                     blobs[j].position.x = Math.floor((Math.random() * width) + 1);
                     blobs[j].position.y = Math.floor((Math.random() * height) + 1);
                   }
@@ -202,6 +237,14 @@
           return blobs;
         }
 
+        function inRectBounds(pos, rect) {
+          if (pos.x >= rect.x && pos.x < rect.x+rect.width) {
+            if (pos.y >= rect.y && pos.y < rect.y + rect.height) {
+              return true;
+            }
+          }
+          return false;
+        }
         function getOriginalSize(blob){
           var size = Math.log(1 + blob.followers + (blob.likes/(blob.following+1)));
           if(size < 1) size = 1;
